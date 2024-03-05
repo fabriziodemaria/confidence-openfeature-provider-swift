@@ -13,7 +13,7 @@ public class EventSenderClient: EventSender {
     private let contextProvider: ContextProvider
     private var secret: String
 
-    init(
+    public init(
         secret: String,
         contextProvider: ContextProvider
     ) {

@@ -17,11 +17,9 @@ struct ConfidenceDemoApp: App {
 extension ConfidenceDemoApp {
     func setup() {
         Task {
-            // Configure the Confidence singleton
-            Confidence.shared.setClientSecret(clientSecret: "oyZhk114S4HIx1xN7cUWxbjfL3IWUK9m")
+            let clientSecret = "oyZhk114S4HIx1xN7cUWxbjfL3IWUK9m"
 
-            // Configure the OpenFeature singleton
-            let provider = Confidence.shared.providerBuilder()
+            let provider = ConfidenceFeatureProvider.Builder(credentials: ConfidenceClientCredentials.clientSecret(secret: clientSecret))
                 .with(initializationStrategy: .fetchAndActivate)
                 .build()
             let evalContext = MutableContext(
@@ -32,9 +30,7 @@ extension ConfidenceDemoApp {
                 initialContext: evalContext)
 
             // Create an EventSender instance
-            let eventSender = Confidence.shared.createEventSender(
-                forwardEvaluationContext: true) // Automatically adds "targeting_key" in the evaluation context to event context, if available
-            // Create a OpenFeatureClient instance
+            let eventSender = EventSenderClient(secret: clientSecret, contextProvider: EvaluationContextProvider())
             let openFeatureClient = OpenFeatureAPI.shared.getClient()
 
             // Resolve a flag
@@ -67,6 +63,14 @@ extension ConfidenceDemoApp {
                  )
              ])*/
         }
+    }
+}
+
+
+// ContextProvider is defined in the EventSedner sub-module
+public final class EvaluationContextProvider: ContextProvider {
+    public func getCurrent() -> String {
+        OpenFeatureAPI.shared.getEvaluationContext()?.getTargetingKey() ?? ""
     }
 }
 
