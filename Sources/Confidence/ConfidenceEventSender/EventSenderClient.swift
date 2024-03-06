@@ -8,7 +8,7 @@ public protocol ContextProvider {
     func getCurrent() -> String // TODO Use complex type
 }
 
-public class EventSenderClient: EventSender {
+public class EventSenderClient: ConfidenceEventSender {
     private var httpClient = NetworkClient(region: .eventsEu)
     private let contextProvider: ContextProvider
     private var secret: String
@@ -28,12 +28,10 @@ public class EventSenderClient: EventSender {
                     clientSecret: secret,
                     events: [Event(
                         eventDefinition: "eventDefinitions/\(eventName)",
-                        payload: Payload(message: message, context: Context(context: Context.Evaluation(targeting_key: contextProvider.getCurrent()))),
+                        payload: Payload(message: message, context: Context(evaluation: Context.Evaluation(targeting_key: contextProvider.getCurrent()))),
                         eventTime: Date.now.ISO8601Format())],
                     sendTime: Date.now.ISO8601Format())
-                print(">> \(request)")
                 let response: EventResult = try await self.httpClient.post(path: ":publish", data: request)
-                print(">> \(try response.get().response.statusCode)")
             } else {
                 // Fallback on earlier versions
             }
@@ -60,7 +58,7 @@ struct Payload<T: Codable>: Codable {
 }
 
 struct Context: Codable {
-    var context: Evaluation
+    var evaluation: Evaluation
 
     struct Evaluation: Codable {
         var targeting_key: String

@@ -3,7 +3,7 @@ import OpenFeature
 
 public protocol ConfidenceProtocol {
     func providerBuilder() -> ConfidenceFeatureProvider.Builder
-    func createEventSender(forwardEvaluationContext: Bool) -> EventSender
+    func createEventSender(forwardEvaluationContext: Bool) -> ConfidenceEventSender
 }
 
 // ContextProvider is defined in the EventSedner sub-module
@@ -32,7 +32,7 @@ public class Confidence: ConfidenceProtocol {
     }
 
     // Should this be a singleton instead?
-    public func createEventSender(forwardEvaluationContext: Bool = false) -> EventSender {
+    public func createEventSender(forwardEvaluationContext: Bool = false) -> ConfidenceEventSender {
         // TODO Emit listenable error events if client secret is not set
         return EventSenderClient(secret: clientSecret ?? "", contextProvider: EvaluationContextProvider())
     }

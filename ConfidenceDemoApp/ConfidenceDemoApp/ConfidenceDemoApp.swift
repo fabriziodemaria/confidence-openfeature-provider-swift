@@ -4,73 +4,43 @@ import SwiftUI
 
 @main
 struct ConfidenceDemoApp: App {
+    let appData = AppData()
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(appData)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-                    self.setup()
+                    self.setup(appData: appData)
                 }
         }
     }
 }
 
-extension ConfidenceDemoApp {
-    func setup() {
-        Task {
-            // Configure the Confidence singleton
-            Confidence.shared.setClientSecret(clientSecret: "oyZhk114S4HIx1xN7cUWxbjfL3IWUK9m")
+class AppData: ObservableObject {
+    @Published var user = ["fdema", "vahidt", "andreask", "nicklasl", "nickyb"].randomElement() ?? "unknown"
+    @Published var eventSender: ConfidenceEventSender
 
+    init() {
+        Confidence.shared.setClientSecret(clientSecret: "oyZhk114S4HIx1xN7cUWxbjfL3IWUK9m")
+        eventSender = Confidence.shared.createEventSender(forwardEvaluationContext: true)
+    }
+}
+
+extension ConfidenceDemoApp {
+    func setup(appData: AppData) {
+        Task {
             // Configure the OpenFeature singleton
             let provider = Confidence.shared.providerBuilder()
                 .with(initializationStrategy: .fetchAndActivate)
                 .build()
+            print(">> Setting context with user \(appData.user)")
             let evalContext = MutableContext(
-                targetingKey: "fdema",
+                targetingKey: appData.user,
                 structure: MutableStructure())
             await OpenFeatureAPI.shared.setProviderAndWait(
                 provider: provider,
                 initialContext: evalContext)
 
-            // Create an EventSender instance
-            let eventSender = Confidence.shared.createEventSender(
-                forwardEvaluationContext: true) // Automatically adds "targeting_key" in the evaluation context to event context, if available
-            // Create a OpenFeatureClient instance
-            let openFeatureClient = OpenFeatureAPI.shared.getClient()
-
-            // Resolve a flag
-            let flagValue = openFeatureClient.getValue(key: "swift-demoapp.color", defaultValue: "ERROR")
-            print(">> \(flagValue)") // "YELLOW"
-            // Send an event
-            eventSender.send(
-                eventName: "button-clicked",
-                message: ButtonClicked(button_id: "imaginary-button")
-            )
-            /*
-            Generated request:
-
-             (clientSecret: "oyZhk114S4HIx1xN7cUWxbjfL3IWUK9m",
-             sendTime: "2024-03-04T13:22:32Z",
-             events: [
-                 (
-                     eventDefinition: "eventDefinitions/button-clicked",
-                     eventTime: "2024-03-04T13:22:32Z",
-                     payload: (
-                         message: (
-                             button_id: "imaginary-button"
-                         ),
-                         context: (
-                             evaluation: (
-                                 targeting_key: "fdema"
-                             )
-                         )
-                     )
-                 )
-             ])*/
         }
     }
-}
-
-// How do we support types like Date and Timestamp?
-struct ButtonClicked: Codable {
-    var button_id: String
 }

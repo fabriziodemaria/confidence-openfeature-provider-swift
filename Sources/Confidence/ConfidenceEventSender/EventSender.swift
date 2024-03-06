@@ -1,5 +1,5 @@
 import Foundation
 
-public protocol EventSender {
+public protocol ConfidenceEventSender {
     func send<P: Codable>(eventName: String, message: P)
 }

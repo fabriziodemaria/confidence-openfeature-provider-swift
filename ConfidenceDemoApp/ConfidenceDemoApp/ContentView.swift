@@ -1,35 +1,46 @@
 import SwiftUI
 import OpenFeature
 import Combine
+import Confidence
 
 struct ContentView: View {
     @StateObject var status = Status()
     @StateObject var text = DisplayText()
+    @StateObject var errorText = ErrorMessageText()
     @StateObject var color = FlagColor()
+    @EnvironmentObject var appData: AppData
 
     var body: some View {
         if case .ready = status.state {
             VStack {
-                Image(systemName: "flag")
-                    .imageScale(.large)
-                    .foregroundColor(color.color)
+                Text("You are \(appData.user) 👋")
                     .padding(10)
-                Text(text.text)
-                Button("Get remote flag value") {
-                    text.text = OpenFeatureAPI
-                        .shared
-                        .getClient()
-                        .getStringValue(key: "swift-demoapp.color", defaultValue: "ERROR")
-                    if text.text == "Green" {
-                        color.color = .green
-                    } else if text.text == "Yellow" {
-                        color.color = .yellow
-                    } else {
-                        color.color = .red
-                    }
+                Button(action: {
+                    appData.eventSender.send(eventName: "button-clicked", message: ButtonClicked(button_id: "flag-icon"))
+                }) {
+                    Image(systemName: "flag")
+                        .imageScale(.large)
+                        .foregroundColor(color.color)
+                        .padding(5)
                 }
+                Text(text.text)
+                .padding(CGFloat(exactly: 10.0) ?? 10)
+                Text(errorText.text)
+            }.onAppear {
+                let resolveDetails = OpenFeatureAPI
+                    .shared
+                    .getClient()
+                    .getStringDetails(key: "swift-demoapp.color", defaultValue: "ERROR")
+                if resolveDetails.value == "Green" {
+                    color.color = .green
+                } else if resolveDetails.value == "Yellow" {
+                    color.color = .yellow
+                } else {
+                    color.color = .red
+                }
+                errorText.text = resolveDetails.errorMessage ?? ""
+                text.text = "Tap the flag 👆"
             }
-            .padding()
         } else if case .error(let error) = status.state {
             VStack {
                 Text("Provider Error")
@@ -72,10 +83,18 @@ class Status: ObservableObject {
 }
 
 class DisplayText: ObservableObject {
-    @Published var text = "Hello World!"
+    @Published var text = ""
+}
+
+class ErrorMessageText: ObservableObject {
+    @Published var text = ""
 }
 
 
 class FlagColor: ObservableObject {
     @Published var color: Color = .black
+}
+
+struct ButtonClicked: Codable {
+    var button_id: String
 }

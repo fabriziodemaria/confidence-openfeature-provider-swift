@@ -48,10 +48,17 @@ final class NetworkClient: HttpClient {
         data: Codable
     ) async throws -> HttpClientResult<T> {
         let request = try buildRequest(path: path, data: data)
+        
         let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
         let jsonData = try encoder.encode(data)
-        let jsonString = String(data: jsonData, encoding: .utf8)
+        if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("✉️ \(path) \(jsonString)")
+            } else {
+                print("Error converting data to string")
+            }
         let requestResult = await perform(request: request, retry: self.retry)
+        print("📪 \(requestResult.httpResponse?.statusCode ?? -1)")
         if let error = requestResult.error {
             return .failure(error)
         }
