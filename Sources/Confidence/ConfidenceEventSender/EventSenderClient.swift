@@ -9,6 +9,13 @@ public protocol ContextProvider {
 }
 
 public class EventSenderClient: ConfidenceEventSender {
+
+
+    public func withContext(_ context: EventSenderContext) {
+        self.context.append(context)
+    }
+
+    private var context: [EventSenderContext] = []
     private var httpClient = NetworkClient(region: .eventsEu)
     private let contextProvider: ContextProvider
     private var secret: String
@@ -22,16 +29,20 @@ public class EventSenderClient: ConfidenceEventSender {
     }
 
     public func send<T: Codable>(eventName: String, message: T) {
+        send(eventName: eventName, message: message, contexts: self.context)
+    }
+    
+    private func send<T: Codable>(eventName: String, message: T, contexts: [EventSenderContext]) {
         Task {
             if #available(iOS 15.0, *) {
                 let request = EventRequest(
                     clientSecret: secret,
                     events: [Event(
                         eventDefinition: "eventDefinitions/\(eventName)",
-                        payload: Payload(message: message, context: Context(evaluation: Context.Evaluation(targeting_key: contextProvider.getCurrent()))),
+                        payload: Payload(message: message, context: RootContext(evaluation: RootContext.Evaluation(targeting_key: contextProvider.getCurrent()), custom: contexts)),
                         eventTime: Date.now.ISO8601Format())],
                     sendTime: Date.now.ISO8601Format())
-                let response: EventResult = try await self.httpClient.post(path: ":publish", data: request)
+                let _: EventResult = try await self.httpClient.post(path: ":publish", data: request)
             } else {
                 // Fallback on earlier versions
             }
@@ -54,11 +65,12 @@ struct Event<T: Codable>: Codable {
 
 struct Payload<T: Codable>: Codable {
     var message: T
-    var context: Context
+    var context: RootContext
 }
 
-struct Context: Codable {
+struct RootContext: Codable {
     var evaluation: Evaluation
+    var custom: [EventSenderContext]
 
     struct Evaluation: Codable {
         var targeting_key: String

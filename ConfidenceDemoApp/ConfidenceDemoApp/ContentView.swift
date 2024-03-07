@@ -8,23 +8,34 @@ struct ContentView: View {
     @StateObject var text = DisplayText()
     @StateObject var errorText = ErrorMessageText()
     @StateObject var color = FlagColor()
-    @EnvironmentObject var appData: AppData
+    let eventSender: ConfidenceEventSender
+    let userId: String
+
+    init(eventSender: ConfidenceEventSender, userId: String) {
+        self.eventSender = eventSender
+        self.userId = userId
+    }
+
 
     var body: some View {
         if case .ready = status.state {
             VStack {
-                Text("You are \(appData.user) 👋")
+                Image("confidence_text")
+                    .resizable()
+                    .scaledToFit()
+                    .padding(40)
+                Text("You are \(Text(userId).foregroundColor(color.color)) 👋")
+                Text(text.text)
                     .padding(10)
                 Button(action: {
-                    appData.eventSender.send(eventName: "button-clicked", message: ButtonClicked(button_id: "flag-icon"))
+                    eventSender.send(eventName: "button-clicked", message: ButtonClicked(button_id: "flag-icon"))
                 }) {
                     Image(systemName: "flag")
                         .imageScale(.large)
                         .foregroundColor(color.color)
                         .padding(5)
                 }
-                Text(text.text)
-                .padding(CGFloat(exactly: 10.0) ?? 10)
+                .padding(20)
                 Text(errorText.text)
             }.onAppear {
                 let resolveDetails = OpenFeatureAPI
@@ -39,7 +50,7 @@ struct ContentView: View {
                     color.color = .red
                 }
                 errorText.text = resolveDetails.errorMessage ?? ""
-                text.text = "Tap the flag 👆"
+                text.text = "👇 Tap the flag to send metrics👇"
             }
         } else if case .error(let error) = status.state {
             VStack {

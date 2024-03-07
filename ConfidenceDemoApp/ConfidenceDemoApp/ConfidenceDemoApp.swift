@@ -7,10 +7,9 @@ struct ConfidenceDemoApp: App {
     let appData = AppData()
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(appData)
+            ContentView(eventSender: appData.eventSender, userId: appData.user)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-                    self.setup(appData: appData)
+                    self.setup(userId: appData.user)
                 }
         }
     }
@@ -23,11 +22,14 @@ class AppData: ObservableObject {
     init() {
         Confidence.shared.setClientSecret(clientSecret: "oyZhk114S4HIx1xN7cUWxbjfL3IWUK9m")
         eventSender = Confidence.shared.createEventSender(forwardEvaluationContext: true)
+        eventSender.withContext(EventSenderContext(
+            context_id: "page_id",
+            context_data: AnyCodable("home_screen")))
     }
 }
 
 extension ConfidenceDemoApp {
-    func setup(appData: AppData) {
+    func setup(userId: String) {
         Task {
             // Configure the OpenFeature singleton
             let provider = Confidence.shared.providerBuilder()
