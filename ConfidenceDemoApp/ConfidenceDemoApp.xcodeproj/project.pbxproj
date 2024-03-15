@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		73FE9AD52B95C795008C5FCF /* Confidence in Frameworks */ = {isa = PBXBuildFile; productRef = 73FE9AD42B95C795008C5FCF /* Confidence */; };
-		73FE9AD82B95C7E3008C5FCF /* Confidence in Frameworks */ = {isa = PBXBuildFile; productRef = 73FE9AD72B95C7E3008C5FCF /* Confidence */; };
+		7322FB492BA4584B00BD2652 /* Confidence in Frameworks */ = {isa = PBXBuildFile; productRef = 7322FB482BA4584B00BD2652 /* Confidence */; };
 		C770C99A2A739FBC00C2AC8C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C770C9962A739FBC00C2AC8C /* Preview Assets.xcassets */; };
 		C770C99B2A739FBC00C2AC8C /* ConfidenceDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C770C9972A739FBC00C2AC8C /* ConfidenceDemoApp.swift */; };
 		C770C99C2A739FBC00C2AC8C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C770C9982A739FBC00C2AC8C /* ContentView.swift */; };
@@ -56,8 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				73FE9AD82B95C7E3008C5FCF /* Confidence in Frameworks */,
-				73FE9AD52B95C795008C5FCF /* Confidence in Frameworks */,
+				7322FB492BA4584B00BD2652 /* Confidence in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,8 +168,7 @@
 			);
 			name = ConfidenceDemoApp;
 			packageProductDependencies = (
-				73FE9AD42B95C795008C5FCF /* Confidence */,
-				73FE9AD72B95C7E3008C5FCF /* Confidence */,
+				7322FB482BA4584B00BD2652 /* Confidence */,
 			);
 			productName = ConfidenceDemoApp;
 			productReference = C770C9682A739FA000C2AC8C /* ConfidenceDemoApp.app */;
@@ -250,7 +247,7 @@
 			mainGroup = C770C95F2A739FA000C2AC8C;
 			packageReferences = (
 				7381EC6D2B87444500BBBA79 /* XCRemoteSwiftPackageReference "swift-sdk" */,
-				73FE9AD62B95C7E3008C5FCF /* XCLocalSwiftPackageReference ".." */,
+				7322FB452BA457C700BD2652 /* XCLocalSwiftPackageReference ".." */,
 			);
 			productRefGroup = C770C9692A739FA000C2AC8C /* Products */;
 			projectDirPath = "";
@@ -651,7 +648,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		73FE9AD62B95C7E3008C5FCF /* XCLocalSwiftPackageReference ".." */ = {
+		7322FB452BA457C700BD2652 /* XCLocalSwiftPackageReference ".." */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ..;
 		};
@@ -669,11 +666,7 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		73FE9AD42B95C795008C5FCF /* Confidence */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Confidence;
-		};
-		73FE9AD72B95C7E3008C5FCF /* Confidence */ = {
+		7322FB482BA4584B00BD2652 /* Confidence */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Confidence;
 		};

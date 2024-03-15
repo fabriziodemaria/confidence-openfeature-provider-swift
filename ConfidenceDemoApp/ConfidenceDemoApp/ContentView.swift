@@ -9,13 +9,23 @@ struct ContentView: View {
     @StateObject var errorText = ErrorMessageText()
     @StateObject var color = FlagColor()
     let eventSender: ConfidenceEventSender
-    let userId: String
+    let ofClient: Client
+    @State var userId = UUID().uuidString
 
-    init(eventSender: ConfidenceEventSender, userId: String) {
+    init(eventSender: ConfidenceEventSender) {
+        eventSender.withContext(EventSenderContext(
+            context_id: "page_id",
+            context_data: AnyCodable("home_screen")))
         self.eventSender = eventSender
-        self.userId = userId
+        self.ofClient = OpenFeatureAPI
+            .shared
+            .getClient()
+        let evalContext = MutableContext(
+            targetingKey: userId,
+            structure: MutableStructure())
+        userId = userId
+        OpenFeatureAPI.shared.setEvaluationContext(evaluationContext: evalContext)
     }
-
 
     var body: some View {
         if case .ready = status.state {
@@ -24,7 +34,27 @@ struct ContentView: View {
                     .resizable()
                     .scaledToFit()
                     .padding(40)
-                Text("You are \(Text(userId).foregroundColor(color.color)) 👋")
+                Text("👋 You are \n \(Text(userId).foregroundColor(color.color))")
+                    .multilineTextAlignment(.center)
+                Button(action: {
+                    userId = UUID.init().uuidString
+                    let evalContext = MutableContext(
+                        targetingKey: userId,
+                        structure: MutableStructure())
+                    Task {
+                        let _ = OpenFeatureAPI.shared.observe().sink { e in
+                            if (e == .ready) {
+                                updateFlagColor()
+                            }
+                        }
+                        OpenFeatureAPI.shared.setEvaluationContext(evaluationContext: evalContext)
+                    }
+                }) {
+                    Image(systemName: "person.line.dotted.person")
+                        .imageScale(.large)
+                        .foregroundColor(color.color)
+                        .padding(5)
+                }
                 Text(text.text)
                     .padding(10)
                 Button(action: {
@@ -38,19 +68,7 @@ struct ContentView: View {
                 .padding(20)
                 Text(errorText.text)
             }.onAppear {
-                let resolveDetails = OpenFeatureAPI
-                    .shared
-                    .getClient()
-                    .getStringDetails(key: "swift-demoapp.color", defaultValue: "ERROR")
-                if resolveDetails.value == "Green" {
-                    color.color = .green
-                } else if resolveDetails.value == "Yellow" {
-                    color.color = .yellow
-                } else {
-                    color.color = .red
-                }
-                errorText.text = resolveDetails.errorMessage ?? ""
-                text.text = "👇 Tap the flag to send metrics👇"
+                updateFlagColor()
             }
         } else if case .error(let error) = status.state {
             VStack {
@@ -63,6 +81,22 @@ struct ContentView: View {
                 ProgressView()
             }
         }
+    }
+
+    private func updateFlagColor() {
+        let resolveDetails = OpenFeatureAPI
+            .shared
+            .getClient()
+            .getStringDetails(key: "swift-demoapp.color", defaultValue: "ERROR")
+        if resolveDetails.value == "Green" {
+            color.color = .green
+        } else if resolveDetails.value == "Yellow" {
+            color.color = .yellow
+        } else {
+            color.color = .red
+        }
+        errorText.text = resolveDetails.errorMessage ?? ""
+        text.text = "👇 Tap the flag to send metrics👇"
     }
 }
 

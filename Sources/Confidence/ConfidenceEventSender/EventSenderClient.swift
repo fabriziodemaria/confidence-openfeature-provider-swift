@@ -39,7 +39,7 @@ public class EventSenderClient: ConfidenceEventSender {
                     clientSecret: secret,
                     events: [Event(
                         eventDefinition: "eventDefinitions/\(eventName)",
-                        payload: Payload(message: message, context: RootContext(evaluation: RootContext.Evaluation(targeting_key: contextProvider.getCurrent()), custom: contexts)),
+                        payload: Payload(message: message, context: RootContext(openFeature: RootContext.Evaluation(targeting_key: contextProvider.getCurrent()), custom: contexts.first)),
                         eventTime: Date.now.ISO8601Format())],
                     sendTime: Date.now.ISO8601Format())
                 let _: EventResult = try await self.httpClient.post(path: ":publish", data: request)
@@ -69,8 +69,8 @@ struct Payload<T: Codable>: Codable {
 }
 
 struct RootContext: Codable {
-    var evaluation: Evaluation
-    var custom: [EventSenderContext]
+    var openFeature: Evaluation
+    var custom: EventSenderContext?
 
     struct Evaluation: Codable {
         var targeting_key: String

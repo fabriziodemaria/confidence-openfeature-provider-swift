@@ -4,45 +4,34 @@ import SwiftUI
 
 @main
 struct ConfidenceDemoApp: App {
-    let appData = AppData()
+    let esHolder = EventSenderHolder()
     var body: some Scene {
         WindowGroup {
-            ContentView(eventSender: appData.eventSender, userId: appData.user)
+            ContentView(eventSender: esHolder.eventSender)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-                    self.setup(userId: appData.user)
+                    self.setup()
                 }
         }
     }
 }
 
-class AppData: ObservableObject {
-    @Published var user = ["fdema", "vahidt", "andreask", "nicklasl", "nickyb"].randomElement() ?? "unknown"
+class EventSenderHolder: ObservableObject {
     @Published var eventSender: ConfidenceEventSender
 
     init() {
         Confidence.shared.setClientSecret(clientSecret: "oyZhk114S4HIx1xN7cUWxbjfL3IWUK9m")
         eventSender = Confidence.shared.createEventSender(forwardEvaluationContext: true)
-        eventSender.withContext(EventSenderContext(
-            context_id: "page_id",
-            context_data: AnyCodable("home_screen")))
     }
 }
 
 extension ConfidenceDemoApp {
-    func setup(userId: String) {
+    func setup() {
         Task {
-            // Configure the OpenFeature singleton
             let provider = Confidence.shared.providerBuilder()
                 .with(initializationStrategy: .fetchAndActivate)
                 .build()
-            print(">> Setting context with user \(appData.user)")
-            let evalContext = MutableContext(
-                targetingKey: appData.user,
-                structure: MutableStructure())
             await OpenFeatureAPI.shared.setProviderAndWait(
-                provider: provider,
-                initialContext: evalContext)
-
+                provider: provider)
         }
     }
 }
