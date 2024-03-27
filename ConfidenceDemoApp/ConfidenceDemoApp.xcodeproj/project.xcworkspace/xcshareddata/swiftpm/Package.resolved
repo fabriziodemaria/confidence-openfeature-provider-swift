@@ -1,14 +1,16 @@
 {
-  "pins" : [
-    {
-      "identity" : "swift-sdk",
-      "kind" : "remoteSourceControl",
-      "location" : "git@github.com:open-feature/swift-sdk.git",
-      "state" : {
-        "revision" : "02b033c954766e86d5706bfc8ee5248244c11e77",
-        "version" : "0.1.0"
+  "object": {
+    "pins": [
+      {
+        "package": "OpenFeature",
+        "repositoryURL": "git@github.com:open-feature/swift-sdk.git",
+        "state": {
+          "branch": null,
+          "revision": "02b033c954766e86d5706bfc8ee5248244c11e77",
+          "version": "0.1.0"
+        }
       }
-    }
-  ],
-  "version" : 2
+    ]
+  },
+  "version": 1
 }
